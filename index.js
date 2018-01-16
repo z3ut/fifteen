@@ -3,6 +3,7 @@ const boardSize = 4;
 const boardElement = document.querySelector('[data-board]');
 const numberOfBoardShuffles = 10000;
 const backgroundImgUrl = './cat.jpg';
+const boardGapPx = 4;
 
 initializeGame();
 
@@ -20,7 +21,7 @@ function initializeDisplayBoard() {
   boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
   boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
 
-  while(boardElement.hasChildNodes()) {
+  while (boardElement.hasChildNodes()) {
     boardElement.removeChild(boardElement.lastChild);
   }
 }
@@ -44,7 +45,7 @@ function initializeBoard() {
         cellElement.textContent = cell.value;
 
         cellElement.style.backgroundImage = `url(${backgroundImgUrl})`;
-        cellElement.style.backgroundSize = `${boardElement.clientWidth}px ${boardElement.clientHeight}px`;
+        cellElement.style.backgroundSize = `${boardElement.clientWidth - boardGapPx * (boardSize - 1)}px ${boardElement.clientHeight - boardGapPx * (boardSize - 1)}px`;
         cellElement.style.backgroundPosition = `-${100 * x}% -${100 * y}%`;
       }
       cell.element = cellElement;
@@ -105,10 +106,10 @@ function tryMoveCellAndGetChangedCells(cell) {
 
   const emptyCell = emptyCells[0];
 
-  [ cell.x, cell.y, emptyCell.x, emptyCell.y ] = [ emptyCell.x, emptyCell.y, cell.x, cell.y ];
-  [ board[cell.x][cell.y], board[emptyCell.x][emptyCell.y] ] = [ board[emptyCell.x][emptyCell.y], board[cell.x][cell.y] ];
+  [cell.x, cell.y, emptyCell.x, emptyCell.y] = [emptyCell.x, emptyCell.y, cell.x, cell.y];
+  [board[cell.x][cell.y], board[emptyCell.x][emptyCell.y]] = [board[emptyCell.x][emptyCell.y], board[cell.x][cell.y]];
 
-  return [ cell, emptyCell ];
+  return [cell, emptyCell];
 }
 
 function getChangedCellsOnMove(cell) {
@@ -131,7 +132,7 @@ function getCellNeigbours(x, y) {
     { x, y: y - 1 },
     { x: x + 1, y },
     { x, y: y + 1 },
-    { x: x - 1, y}
+    { x: x - 1, y }
   ];
   return neighboursCordinates.map(coords => {
     if (board[coords.x] && board[coords.x][coords.y]) {

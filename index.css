@@ -11,7 +11,7 @@ html, body {
   max-height: 100vw;
   margin: auto;
   display: grid;
-  box-sizing: border-box;
+  grid-gap: 4px;
   background-color: azure;
 }
 
@@ -19,13 +19,19 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2em;
   cursor: pointer;
-  background-color: white;
   -moz-user-select: none;
   user-select: none;
+  font-size: 3em;
+  font-weight: 900;
+  color: chocolate;
+}
+
+.cell:hover {
+  color: crimson;
+  outline: .05em solid crimson;
 }
 
 .cell.empty {
-  background-color: lightgrey;
+  background-color: white;
 }
