@@ -1,0 +1,33 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.board {
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  background-color: azure;
+}
+
+.cell {
+  width: calc(25% - .5em);
+  height: calc(25% - .5em);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  cursor: pointer;
+  box-sizing: content-box;
+  margin: .25em;
+  background-color: white;
+  -moz-user-select: none;
+  user-select: none;
+
+  /* transition: all .5s; */
+}
+
+.cell.empty {
+  background-color: lightgrey;
+}
