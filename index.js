@@ -6,7 +6,7 @@ const numberOfBoardShuffles = 10000;
 initializeGame();
 
 function initializeGame() {
-  clearBoard();
+  initializeDisplatBoard();
   initializeBoardData();
   
   drawBoard();
@@ -14,7 +14,9 @@ function initializeGame() {
   shuffleBoard();
 }
 
-function clearBoard() {
+function initializeDisplatBoard() {
+  boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+  boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
   while(boardElement.hasChildNodes()) {
     boardElement.removeChild(boardElement.lastChild);
   }
@@ -24,27 +26,12 @@ function initializeBoardData() {
   for (let x = 0; x < boardSize; x++) {
     board[x] = [];
     for (let y = 0; y < boardSize; y++) {
-      const isEmptyCell = x == boardSize - 1 && y == boardSize - 1;
-      const elementNumber = calculateCellPosition(x, y);
-      // const cellElement = document.createElement('div');
-      // cellElement.classList.add('cell');
-      // if (isEmptyCell) {
-      //   cellElement.classList.add('empty');
-      // } else {
-      //   cellElement.textContent = elementNumber;
-      // }
-      const cell = {
-        // element: cellElement,
-        value: elementNumber,
-        isEmptyCell,
+      board[x].push({
+        value: calculateCellPosition(x, y),
+        isEmptyCell: x == boardSize - 1 && y == boardSize - 1,
         x,
         y
-      };
-      board[x].push(cell);
-      // updateCellPositionOnBoard(cell);
-      // const sellClickHandler = handleCellClick.bind(null, cell);
-      // cellElement.addEventListener('click', sellClickHandler);
-      // boardElement.appendChild(cellElement);
+      });
     }
   }
 }
@@ -82,7 +69,9 @@ function calculateCellPosition(x, y) {
 }
 
 function updateCellDisplayPosition(cell) {
-  cell.element.style.order = calculateCellPosition(cell.x, cell.y);
+  // cell.element.style.order = calculateCellPosition(cell.x, cell.y);
+  cell.element.style.gridColumn = `${cell.x + 1} / span 1`;
+  cell.element.style.gridRow = `${cell.y + 1} / span 1`;
 }
 
 function handleCellClick(cell, isShuffling) {
