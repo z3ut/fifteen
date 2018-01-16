@@ -2,56 +2,70 @@ const board = [];
 const boardSize = 4;
 const boardElement = document.querySelector('[data-board]');
 const numberOfBoardShuffles = 10000;
+const backgroundImgUrl = './cat.jpg';
 
 initializeGame();
 
 function initializeGame() {
-  initializeDisplatBoard();
-  initializeBoardData();
-  
-  drawBoard();
+  initializeDisplayBoard();
+  initializeBoard();
 
   shuffleBoard();
+  board.forEach(column => column.forEach(updateCellDisplayPosition));
+
+  window.addEventListener('resize', updateBoardBackgroundSizes);
 }
 
-function initializeDisplatBoard() {
+function initializeDisplayBoard() {
   boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
   boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
+
   while(boardElement.hasChildNodes()) {
     boardElement.removeChild(boardElement.lastChild);
   }
 }
 
-function initializeBoardData() {
+function initializeBoard() {
   for (let x = 0; x < boardSize; x++) {
     board[x] = [];
     for (let y = 0; y < boardSize; y++) {
-      board[x].push({
+      const cell = {
         value: calculateCellPosition(x, y),
         isEmptyCell: x == boardSize - 1 && y == boardSize - 1,
         x,
         y
-      });
-    }
-  }
-}
+      };
 
-function drawBoard() {
-  for (let x = 0; x < boardSize; x++) {
-    for (let y = 0; y < boardSize; y++) {
-      const cell = board[x][y];
       const cellElement = document.createElement('div');
       cellElement.classList.add('cell');
       if (cell.isEmptyCell) {
         cellElement.classList.add('empty');
       } else {
         cellElement.textContent = cell.value;
+
+        cellElement.style.backgroundImage = `url(${backgroundImgUrl})`;
+        cellElement.style.backgroundSize = `${boardElement.clientWidth}px ${boardElement.clientHeight}px`;
+        cellElement.style.backgroundPosition = `-${100 * x}% -${100 * y}%`;
       }
       cell.element = cellElement;
       updateCellDisplayPosition(cell);
-      const sellClickHandler = handleCellClick.bind(null, cell);
-      cellElement.addEventListener('click', sellClickHandler);
+      cellElement.addEventListener('click', handleCellClick.bind(null, cell));
       boardElement.appendChild(cellElement);
+
+      board[x].push(cell);
+    }
+  }
+}
+
+function updateBoardBackgroundSizes() {
+  for (let x = 0; x < boardSize; x++) {
+    for (let y = 0; y < boardSize; y++) {
+      const cell = board[x][y];
+      if (cell.isEmptyCell) {
+        continue;
+      }
+      cell.element.style.backgroundSize =
+        `${boardElement.clientWidth}px ${boardElement.clientHeight}px`;
     }
   }
 }
@@ -60,42 +74,41 @@ function shuffleBoard() {
   for (let i = 0; i < numberOfBoardShuffles; i++) {
     const x = Math.floor(Math.random() * boardSize);
     const y = Math.floor(Math.random() * boardSize);
-    tryMoveCell(board[x][y]);
+    tryMoveCellAndGetChangedCells(board[x][y]);
   }
 }
 
 function calculateCellPosition(x, y) {
-  return x * boardSize + y + 1;
+  return y * boardSize + x + 1;
 }
 
 function updateCellDisplayPosition(cell) {
-  // cell.element.style.order = calculateCellPosition(cell.x, cell.y);
   cell.element.style.gridColumn = `${cell.x + 1} / span 1`;
   cell.element.style.gridRow = `${cell.y + 1} / span 1`;
 }
 
 function handleCellClick(cell, isShuffling) {
-  tryMoveCell(cell); // forEach(updateCellPosition);
+  tryMoveCellAndGetChangedCells(cell).forEach(updateCellDisplayPosition);
   checkWinStatus();
 }
 
-function tryMoveCell(cell) {
+function tryMoveCellAndGetChangedCells(cell) {
   if (cell.isEmptyCell) {
-    return;
+    return [];
   }
 
   const emptyCells = getCellNeigbours(cell.x, cell.y)
     .filter(c => c.isEmptyCell);
   if (emptyCells.length == 0) {
-    return;
+    return [];
   }
 
   const emptyCell = emptyCells[0];
 
   [ cell.x, cell.y, emptyCell.x, emptyCell.y ] = [ emptyCell.x, emptyCell.y, cell.x, cell.y ];
   [ board[cell.x][cell.y], board[emptyCell.x][emptyCell.y] ] = [ board[emptyCell.x][emptyCell.y], board[cell.x][cell.y] ];
-  updateCellDisplayPosition(cell);
-  updateCellDisplayPosition(emptyCell);
+
+  return [ cell, emptyCell ];
 }
 
 function getChangedCellsOnMove(cell) {
