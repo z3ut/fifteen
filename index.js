@@ -3,21 +3,22 @@ const boardSize = 4;
 const boardElement = document.querySelector('[data-board]');
 const numberOfBoardShuffles = 10000;
 const backgroundImgUrl = './cat.jpg';
-const boardGapPx = 4;
+const gridGapPx = 4;
+let emptyCell;
 
 initializeGame();
 
 function initializeGame() {
-  initializeDisplayBoard();
+  initializeAndClearDisplayBoard();
   initializeBoard();
 
-  shuffleBoard();
+  shuffleBoardData();
   board.forEach(column => column.forEach(updateCellDisplayPosition));
 
   window.addEventListener('resize', updateBoardBackgroundSizes);
 }
 
-function initializeDisplayBoard() {
+function initializeAndClearDisplayBoard() {
   boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
   boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
 
@@ -40,12 +41,14 @@ function initializeBoard() {
       const cellElement = document.createElement('div');
       cellElement.classList.add('cell');
       if (cell.isEmptyCell) {
+        emptyCell = cell;
         cellElement.classList.add('empty');
       } else {
         cellElement.textContent = cell.value;
 
         cellElement.style.backgroundImage = `url(${backgroundImgUrl})`;
-        cellElement.style.backgroundSize = `${boardElement.clientWidth - boardGapPx * (boardSize - 1)}px ${boardElement.clientHeight - boardGapPx * (boardSize - 1)}px`;
+        const gridTrackGapSizePx = gridGapPx * (boardSize - 1);
+        cellElement.style.backgroundSize = `${boardElement.clientWidth - gridTrackGapSizePx}px ${boardElement.clientHeight - gridTrackGapSizePx}px`;
         cellElement.style.backgroundPosition = `-${100 * x}% -${100 * y}%`;
       }
       cell.element = cellElement;
@@ -71,11 +74,11 @@ function updateBoardBackgroundSizes() {
   }
 }
 
-function shuffleBoard() {
+function shuffleBoardData() {
   for (let i = 0; i < numberOfBoardShuffles; i++) {
-    const x = Math.floor(Math.random() * boardSize);
-    const y = Math.floor(Math.random() * boardSize);
-    tryMoveCellAndGetChangedCells(board[x][y]);
+    const emptyCellNeighbours = getCellNeigbours(emptyCell.x, emptyCell.y);
+    tryMoveCellAndGetChangedCells(emptyCellNeighbours[
+      Math.floor(Math.random() * emptyCellNeighbours.length)]);
   }
 }
 
@@ -98,13 +101,11 @@ function tryMoveCellAndGetChangedCells(cell) {
     return [];
   }
 
-  const emptyCells = getCellNeigbours(cell.x, cell.y)
-    .filter(c => c.isEmptyCell);
-  if (emptyCells.length == 0) {
+  const isEmptyCellInNeighbours = getCellNeigbours(cell.x, cell.y)
+    .some(c => c.isEmptyCell);
+  if (!isEmptyCellInNeighbours) {
     return [];
   }
-
-  const emptyCell = emptyCells[0];
 
   [cell.x, cell.y, emptyCell.x, emptyCell.y] = [emptyCell.x, emptyCell.y, cell.x, cell.y];
   [board[cell.x][cell.y], board[emptyCell.x][emptyCell.y]] = [board[emptyCell.x][emptyCell.y], board[cell.x][cell.y]];
