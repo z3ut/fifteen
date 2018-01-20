@@ -1,10 +1,9 @@
 let board = [];
-let boardSize = 4;
+let boardSize;
 let emptyCell;
 const boardElement = document.querySelector('[data-board]');
 const numberOfBoardShuffles = 10000;
 const backgroundImgUrl = './cat.jpg';
-const gridGapPx = 4;
 
 let numberOfSteps;
 let dateStartGame;
@@ -16,8 +15,6 @@ initialize();
 startNewGame();
 
 function initialize() {
-  window.addEventListener('resize', updateBoardBackgroundSizes);
-
   buttonStartNewGameElement.addEventListener('click', startNewGame);
 }
 
@@ -51,7 +48,6 @@ function initializeBoard() {
         y
       };
 
-      const cellElement = document.createElement('div');
       cell.element.classList.add('cell');
       if (cell.isEmptyCell) {
         emptyCell = cell;
@@ -59,8 +55,7 @@ function initializeBoard() {
       } else {
         cell.element.textContent = cell.value;
         cell.element.style.backgroundImage = `url(${backgroundImgUrl})`;
-        const gridTrackGapSizePx = gridGapPx * (boardSize - 1);
-        cell.element.style.backgroundSize = `${boardElement.clientWidth - gridTrackGapSizePx}px ${boardElement.clientHeight - gridTrackGapSizePx}px`;
+        cell.element.style.backgroundSize = `${100 * boardSize}% ${100 * boardSize}%`;
         cell.element.style.backgroundPosition = `-${100 * x}% -${100 * y}%`;
       }
 
@@ -82,65 +77,34 @@ function shuffleBoard() {
   board.forEach(column => column.forEach(updateCellDisplayPosition));
 }
 
-function updateBoardBackgroundSizes() {
-  for (let x = 0; x < boardSize; x++) {
-    for (let y = 0; y < boardSize; y++) {
-      const cell = board[x][y];
-      if (cell.isEmptyCell) {
-        continue;
-      }
-      cell.element.style.backgroundSize = `${boardElement.clientWidth}px ${boardElement.clientHeight}px`;
-    }
-  }
-}
-
 function calculateCellPosition(x, y) {
   return y * boardSize + x + 1;
 }
 
 function updateCellDisplayPosition(cell) {
-  cell.element.style.gridColumn = `${cell.x + 1} / span 1`;
-  cell.element.style.gridRow = `${cell.y + 1} / span 1`;
+  cell.element.style.gridColumn = `${cell.x + 1}`;
+  cell.element.style.gridRow = `${cell.y + 1}`;
 }
 
 function handleCellClick(cell, isShuffling) {
   const updatedCells = tryMoveCellAndGetChangedCells(cell);
-  if (updatedCells.length > 0) {
-    updatedCells.forEach(updateCellDisplayPosition);
-    numberOfSteps++;
+  if (updatedCells.length === 0) {
+    return;
   }
+  updatedCells.forEach(updateCellDisplayPosition);
+  numberOfSteps++;
   checkWinStatus();
 }
 
 function tryMoveCellAndGetChangedCells(cell) {
-  if (cell.isEmptyCell) {
-    return [];
-  }
-
-  const isEmptyCellInNeighbours = getCellNeigbours(cell.x, cell.y)
-    .some(c => c.isEmptyCell);
-  if (!isEmptyCellInNeighbours) {
+  if (cell.isEmptyCell ||
+      !getCellNeigbours(cell.x, cell.y).some(c => c.isEmptyCell)) {
     return [];
   }
 
   [cell.x, cell.y, emptyCell.x, emptyCell.y] = [emptyCell.x, emptyCell.y, cell.x, cell.y];
   [board[cell.x][cell.y], board[emptyCell.x][emptyCell.y]] = [board[emptyCell.x][emptyCell.y], board[cell.x][cell.y]];
 
-  return [cell, emptyCell];
-}
-
-function getChangedCellsOnMove(cell) {
-  if (cell.isEmptyCell) {
-    return [];
-  }
-
-  const emptyCells = getCellNeigbours(cell.x, cell.y)
-    .filter(c => c.isEmptyCell);
-  if (emptyCells.length == 0) {
-    return [];
-  }
-
-  const emptyCell = emptyCells[0];
   return [cell, emptyCell];
 }
 
@@ -160,9 +124,10 @@ function getCellNeigbours(x, y) {
 
 function checkWinStatus() {
   let isWinStatus = true;
-  for (let x = 0; x < boardSize; x++) {
-    for (let y = 0; y < boardSize; y++) {
-      if (board[x][y].value != calculateCellPosition(x, y) && !board[x][y].isEmptyCell) {
+  for (let x = 0; x < boardSize && isWinStatus; x++) {
+    for (let y = 0; y < boardSize && isWinStatus; y++) {
+      if (board[x][y].value != calculateCellPosition(x, y) &&
+          !board[x][y].isEmptyCell) {
         isWinStatus = false;
       }
     }
@@ -170,7 +135,7 @@ function checkWinStatus() {
 
   if (isWinStatus) {
     const gameTime = Math.ceil((new Date().getTime() - dateStartGame.getTime()) / 1000);
-    alert(`You win.\nGame time: ${gameTime}s\nNumber of steps: ${numberOfSteps}`);
+    alert(`Congratulations!\nGame time: ${gameTime}s\nNumber of steps: ${numberOfSteps}`);
     startNewGame();
   }
 }

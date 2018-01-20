@@ -7,20 +7,15 @@
   <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <div class="container">
-    <div class="board-container">
-      <div class="board" data-board></div>
-    </div>
-    <div class="control-panel">
-      <select name="board size" data-board-size-select>
-        <option value="3">3</option>
-        <option value="4" selected>4</option>
-        <option value="5">5</option>
-      </select>
-      <button class="button" data-button-start-new-game>Start new game</button>
-    </div>
+  <div class="control-panel">
+    <select name="board size" data-board-size-select class="board-size-select">
+      <option value="3">3</option>
+      <option value="4" selected>4</option>
+      <option value="5">5</option>
+    </select>
+    <button class="button" data-button-start-new-game>Start new game</button>
   </div>
-  
+  <div class="board" data-board></div>
 
   <script src="index.js"></script>
 </body>
